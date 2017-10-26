@@ -1,0 +1,17 @@
+#!/bin/bash
+
+init_subj=LPD01_1ON_H
+for subj in $@
+do
+
+
+#initialize with xfm from CT1_1_OFF to overcome errors in affine reg
+reg_intersubj_aladin  t1 MNI152_1mm $subj -i LPD01_1ON_H
+reg_bspline_f3d t1 MNI152_1mm $subj
+
+reg_intrasubj_aladin  t1 dwi $subj -r
+propLabels_compose_reg_bspline_f3d_coreg_rigid_aladin t1 t1 dwi HarvardOxford MNI152_1mm $subj
+propLabels_compose_reg_bspline_f3d_coreg_rigid_aladin t1 t1 dwi striatum MNI152_1mm $subj
+
+
+done

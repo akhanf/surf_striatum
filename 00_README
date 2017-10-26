@@ -1,12 +1,7 @@
-# surf_striatum
-Pipeline for surface-based connectivity and morphometry in the striatum
+2017_07_09
+updates for running on sharcnet and with latest versions (octave instaed of matlab etc..)
 
-
-## Dependencies:
-* vasst-dev (github.com/akhanf/vasst-dev)
-* FSL, niftyreg, ...
-
-## Steps:
+Steps:
 
 importData
 

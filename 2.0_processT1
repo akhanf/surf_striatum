@@ -1,0 +1,18 @@
+#!/bin/bash
+
+for subj in $@
+do
+
+#skull-strip and check results
+preprocT1 $subj
+
+#register to mni and check results
+reg_intersubj_aladin  t1 MNI152_1mm $subj 
+reg_bspline_f3d t1 MNI152_1mm $subj
+
+reg_intrasubj_aladin  t1 dwi $subj -r
+propLabels_compose_reg_bspline_f3d_coreg_rigid_aladin t1 t1 dwi HarvardOxford MNI152_1mm $subj
+propLabels_compose_reg_bspline_f3d_coreg_rigid_aladin t1 t1 dwi striatum MNI152_1mm $subj
+
+
+done

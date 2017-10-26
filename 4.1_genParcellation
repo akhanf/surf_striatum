@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for subj in $@
+do
+
+bedpostParcellateSeed striatum.cfg $subj
+
+done

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ "$#" -lt 1 ]
+then
+ echo "Usage: $0 <subj list>"
+ exit 0
+fi
+
+
+. $PIPELINE_CFG_DIR/parcellate/striatum.cfg
+out_csv=${parcellation_name}.maxProbDiffusionParcVolume.byHemi.csv
+
+
+computeSegVolume StriatumTargets_Hemi.csv dti/eddyCorrect/bedpost.${parcellation_name}/probtrack/MNI152_1mm/diffusion_parcellation.masked.nii.gz  $1 > $out_csv

@@ -1,0 +1,6 @@
+
+subjlist=$1
+
+genOverlay_brainmask $subjlist
+genOverlay_affine_atlasReg MNI152_1mm $subjlist
+genOverlay_bspline_atlasReg MNI152_1mm $subjlist

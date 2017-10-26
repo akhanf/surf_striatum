@@ -1,0 +1,10 @@
+#!/bin/bash
+
+
+for subj in $@
+do
+
+preprocDTI $subj
+bedpostProcess $subj
+
+done

@@ -1,0 +1,97 @@
+#!/bin/bash
+
+
+#this script computes diffusion-based parcellation and corresponding volume 
+
+#problem is that diffusion-based is based on info from single subject, so has less fidelity
+#better comparison is to create group averages of "diffusion-based" and "template-based", and compare those..
+
+
+. $PIPELINE_CFG_DIR/parcellate/striatum.cfg
+
+
+
+#out_csv=${parcellation_name}.subjDiffusionParcVolume.csv
+
+#echo -n subj > $out_csv
+#for lbl_line in `cat $target_labels_txt`
+#do
+
+#  lbl=${lbl_line%%,*}
+
+ # echo -n ,$lbl >> $out_csv
+#done
+
+#echo "" >> $out_csv
+
+#echo "subj,caudal_motor,executive,limbic,occipital,parietal,rostral_motor,temporal" > $out_csv
+
+
+atlas=MNI152_1mm
+
+for subj in $@
+do
+ 
+ track_dir=$subj/dti/eddyCorrect/bedpost.${parcellation_name}/probtrack/$atlas
+ 
+ #use same template-based mask to define outer boundaries of striatum (to ensure these are identical for both diffusion and template-based maps)
+
+ mask=$PIPELINE_ATLAS_DIR/$atlas/labels/t1/striatum/striatum-structural-1mm.nii.gz
+
+
+ dti_parc=$track_dir/diffusion_parcellation.masked.nii.gz
+
+# if [ ! -e $dti_parc ]
+ #then 
+
+
+ seedlist=""
+for lbl_line in `cat $target_labels_txt`
+do
+
+  lbl=${lbl_line%%,*}
+ 
+  map=$track_dir/seeds_to_$lbl.nii.gz
+
+  for hemi in left right
+  do
+  
+  hemi_mask=masks/${hemi}_hemi.nii.gz
+ if [ ! -e $hemi_mask ]
+  then
+  echo "$hemi_mask does not exist!"
+  continue  
+  fi
+
+   hemi_map=$track_dir/seeds_to_$lbl.mask_$hemi.nii.gz
+   echo fslmaths $map -mul $hemi_mask $hemi_map
+   fslmaths $map -mul $hemi_mask $hemi_map
+
+   seedlist="$seedlist $track_dir/seeds_to_${lbl}.mask_${hemi}.nii.gz"
+  done
+
+
+done
+
+
+ 
+
+
+ #create map for diffusion-based parcellation 
+echo fslmerge -t $track_dir/seeds.4d.nii.gz $seedlist
+ fslmerge -t $track_dir/seeds.4d.nii.gz $seedlist
+echo  prob4DtoMaxProb $track_dir/seeds.4d.nii.gz 1 $dti_parc
+ prob4DtoMaxProb $track_dir/seeds.4d.nii.gz 1 $dti_parc
+echo  fslmaths $mask -bin -mul $dti_parc $dti_parc
+ fslmaths $mask -bin -mul $dti_parc $dti_parc
+
+# fi
+
+
+
+
+
+
+
+
+done

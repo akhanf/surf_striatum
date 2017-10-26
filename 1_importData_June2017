@@ -1,0 +1,24 @@
+#!/bin/bash
+
+
+for subj in `cat subjects_newJune2017`
+do
+
+
+dti_dir=incoming_June2017/$subj/dti
+
+
+ echo $subj, $dti_dir
+
+ if [ ! -e $subj/dti/uncorrected/dwi.nii.gz ]
+ then
+   importDicomDTI_dcm2nii $dti_dir $subj
+ fi
+
+t1_dir=incoming_June2017/$subj/t1
+if [ ! -e $subj/t1/t1.nii.gz ]
+then
+  importDicomT1 $t1_dir $subj
+fi
+
+done

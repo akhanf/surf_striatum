@@ -1,0 +1,18 @@
+<ColorMap name="Striatum" space="Diverging" indexedLookup="true">
+  <Point x="1" o="0" r="0.666667" g="0.333333" b="0"/>
+  <Point x="3.64117" o="0.440195" r="0.333333" g="1" b="0"/>
+  <Point x="4.20098" o="0.533496" r="0.666667" g="0.333333" b="1"/>
+  <Point x="4.76078" o="0.626797" r="0" g="0.333333" b="0"/>
+  <Point x="5.32059" o="0.720098" r="1" g="0" b="0"/>
+  <Point x="5.88039" o="0.813398" r="1" g="1" b="0"/>
+  <Point x="6.4402" o="0.906699" r="0" g="0.333333" b="1"/>
+  <Point x="7" o="1" r="0.666667" g="0.333333" b="0"/>
+  <NaN r="0.250004" g="0" b="0"/>
+  <Annotation v="7" t="Temporal"/>
+  <Annotation v="6" t="Rostral motor"/>
+  <Annotation v="5" t="Parietal"/>
+  <Annotation v="4" t="Occipital"/>
+  <Annotation v="3" t="Limbic"/>
+  <Annotation v="2" t="Executive"/>
+  <Annotation v="1" t="Caudal motor"/>
+</ColorMap>
