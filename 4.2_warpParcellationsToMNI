@@ -69,8 +69,7 @@ coreg_dir=$subj_dir/coreg/rigid_aladin_t1_dwi
 xfm_dwi_t1=$coreg_dir/dwi_to_t1.xfm
 
 
-
-track_dir=$subj_dir/dti/eddyCorrect/bedpost.${parcellation_name}/probtrack
+track_dir=$subj_dir/dwi/uncorrected_denoise_unring_eddy/bedpost.${parcellation_name}/probtrack
 
 out_dir=$track_dir/$atlas
 mkdir -p $out_dir

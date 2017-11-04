@@ -4,7 +4,17 @@ Pipeline for surface-based connectivity and morphometry in the striatum
 
 ## Dependencies:
 * vasst-dev (github.com/akhanf/vasst-dev)
-* FSL, niftyreg, ...
+	* FSL, niftyreg, ...
+* Use neuroglia-vasst-dev Singularity container
+
+## to do:
+
+* add c3d dependency back to neuroglia
+* update dwi preproc approach
+* update t1 preproc to make use of appropriate dwi file
+* run matlab script, trim extraneous parts
+
+
 
 ## Steps:
 
@@ -27,16 +37,16 @@ QC again if needed
 
 7.1_computeIndivParcMapLeftRight  <depends on 4.2>
 
-8.3_computeMaxProbDiffParcVolumeLeftRight  
+8.3_computeMaxProbDiffParcVolumeLeftRight   <no batch, depends on 7.1>
 	-generates  striatum_withRostralMotor.maxProbDiffusionParcVolume.byHemi.csv   <-- striatum parcellation volumes in MNI space
 
-9.0_runSurfDisplacementTemplate
+9.0_runSurfDisplacementTemplate  <depends on 2.0>
 	-quick: only takes a few seconds to prepare the template files (no need to run cluster job)
 
-9.1_runSurfDisplacementTargets
+9.1_runSurfDisplacementTargets   <depends on 9.0>
 	-runs LDDMM -- use sharcnetPipe (request at least 8-16GB memory - sharcnetPipe2 or sharcnetPipe4)
 
-9.2_runSurfBasedTractography
+9.2_runSurfBasedTractography	<depends on 9.1 and 4.0>
 	-runs tractography from surface vertices in subject space  - use sharcnetPipe2
 
 

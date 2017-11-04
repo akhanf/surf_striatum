@@ -2,7 +2,6 @@
 
 for subj in $@
 do
-
 #skull-strip and check results
 preprocT1 $subj
 

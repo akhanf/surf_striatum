@@ -3,6 +3,7 @@
 for subj in $@
 do
 
-bedpostParcellateSeed striatum.cfg $subj
+
+ processBedpostParcellateSeed uncorrected_denoise_unring_eddy striatum.cfg $subj
 
 done

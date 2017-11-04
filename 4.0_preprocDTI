@@ -1,10 +1,12 @@
 #!/bin/bash
 
-
+dwi_name=uncorrected
 for subj in $@
 do
-
-preprocDTI $subj
-bedpostProcess $subj
+ 
+ processDwiDenoise uncorrected $subj
+ processUnring uncorrected_denoise $subj
+ processEddyNoTopUp uncorrected_denoise_unring $subj
+ processBedpost uncorrected_denoise_unring_eddy $subj
 
 done

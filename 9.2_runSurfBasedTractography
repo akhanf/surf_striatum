@@ -18,18 +18,18 @@ do
   surfdisp_dir=surfdisp_singlestruct_$surfdisp_name
 
   subj_dir=$subj
-  out_tract_dir=$subj_dir/dti/eddyCorrect/vertexTract
+  out_tract_dir=$subj_dir/dwi/uncorrected_denoise_unring_eddy/vertexTract
 
 
 
   mkdir -p $out_tract_dir
 
 
-targetmasks=$subj_dir/dti/eddyCorrect/bedpost.striatum_withRostralMotor/targets.txt
-brainmask=$subj_dir/dti/eddyCorrect/bedpost.bedpostX/nodif_brain_mask.nii.gz
-brainmask_bin=$subj_dir/dti/eddyCorrect/bedpost.bedpostX/nodif_brain_mask_bin.nii.gz
-bedpost_samples=$subj_dir/dti/eddyCorrect/bedpost.bedpostX/merged
-fa=$subj_dir/dti/eddyCorrect/dti_FA.nii.gz
+targetmasks=$subj_dir/dwi/uncorrected_denoise_unring_eddy/bedpost.striatum_withRostralMotor/targets.txt
+brainmask=$subj_dir/dwi/uncorrected_denoise_unring_eddy/bedpost.bedpostX/nodif_brain_mask.nii.gz
+brainmask_bin=$subj_dir/dwi/uncorrected_denoise_unring_eddy/bedpost.bedpostX/nodif_brain_mask_bin.nii.gz
+bedpost_samples=$subj_dir/dwi/uncorrected_denoise_unring_eddy/bedpost.bedpostX/merged
+fa=$subj_dir/dwi/uncorrected_denoise_unring_eddy/dti_FA.nii.gz
 
 #read index_list to pull out indices of interest
 #pull out indices of interest

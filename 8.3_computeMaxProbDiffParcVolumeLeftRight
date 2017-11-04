@@ -11,4 +11,4 @@ fi
 out_csv=${parcellation_name}.maxProbDiffusionParcVolume.byHemi.csv
 
 
-computeSegVolume StriatumTargets_Hemi.csv dti/eddyCorrect/bedpost.${parcellation_name}/probtrack/MNI152_1mm/diffusion_parcellation.masked.nii.gz  $1 > $out_csv
+computeSegVolume StriatumTargets_Hemi.csv dwi/uncorrected_denoise_unring_eddy/bedpost.${parcellation_name}/probtrack/MNI152_1mm/diffusion_parcellation.masked.nii.gz  $1 > $out_csv
