@@ -6,18 +6,21 @@ Pipeline for surface-based connectivity and morphometry in the striatum
 * vasst-dev (github.com/akhanf/vasst-dev)
 	* FSL, niftyreg, ...
 * Use neuroglia-vasst-dev Singularity container
+* neuroglia-helpers
 
 ## to do:
 
-* add c3d dependency back to neuroglia
-* update dwi preproc approach
-* update t1 preproc to make use of appropriate dwi file
 * run matlab script, trim extraneous parts
 
 
 
 ## Steps:
+00_runAll
 
+
+
+
+# sub-steps
 importData
 
 2.0_processT1
