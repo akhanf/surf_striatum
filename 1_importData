@@ -3,11 +3,16 @@
 #note: does not overwrite existing files!
 #dependencies: dcm2niix, fsl
 
-for subj in `cat subjects_newJune2017`
+input_dir=$1
+shift 1
+
+
+for subj in $@
 do
 
+dti_dir=$input_dir/$subj/dti
+t1_dir=$input_dir/$subj/t1
 
-dti_dir=incoming_June2017/$subj/dti
 
 
  echo $subj, $dti_dir
@@ -17,8 +22,7 @@ dti_dir=incoming_June2017/$subj/dti
    importDicomDTI_dcm2nii $dti_dir $subj
  fi
 
-t1_dir=incoming_June2017/$subj/t1
-if [ ! -e $subj/t1/t1.nii.gz ]
+ if [ ! -e $subj/t1/t1.nii.gz ]
 then
   importDicomT1 $t1_dir $subj
 fi

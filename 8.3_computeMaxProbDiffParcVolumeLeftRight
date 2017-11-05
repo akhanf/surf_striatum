@@ -3,7 +3,7 @@
 if [ "$#" -lt 1 ]
 then
  echo "Usage: $0 <subj list>"
- exit 0
+ exit 1
 fi
 
 

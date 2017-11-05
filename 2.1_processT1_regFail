@@ -1,12 +1,17 @@
 #!/bin/bash
 
-init_subj=LPD01_1ON_H
+#run this on subjects that failed registration, using one of the subjects that passed as init
+
+init_subj=$1
+shift 1
+
+
 for subj in $@
 do
 
 
 #initialize with xfm from CT1_1_OFF to overcome errors in affine reg
-reg_intersubj_aladin  t1 MNI152_1mm $subj -i LPD01_1ON_H
+reg_intersubj_aladin  t1 MNI152_1mm $subj -i $init_subj
 reg_bspline_f3d t1 MNI152_1mm $subj
 
 reg_intrasubj_aladin  t1 dwi $subj -r

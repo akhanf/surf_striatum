@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#use absolute paths here:
+src=/home/akhanf/surf_striatum
+in=/project/6007967/akhanf/projects/penny_striatum/incoming_June2017
+out=/home/akhanf/surf_striatum/work_pipeline
+
+subjlist=$src/subjects_newJune2017
+
+mkdir -p $out
+pushd $out
+
+#import
+job1=$(neurogliaArray $src/1_importData $subjlist -b $in )
+
+#preproc & QC gen
+job2=$(neurogliaArray $src/2.0_processT1 $subjlist -d aftercorr:$job1)
+job4=$(neurogliaArray $src/4.0_preprocDTI $subjlist -d aftercorr:$job1)
+job3=$(neurogliaArray $src/3_genQC $subjlist -d afterok:$job2 -g)
+
+# faillist is created after manual QC of affine reg, and init subject is 
+# chosen to be one of the subj that did not fail
+faillist=$src/subjects_newJune2017.failReg
+init_subj=LPD16_1OFF
+
+#preproc & QC gen 
+job2redo=$(neurogliaArray $src/2.1_processT1_regFail $faillist -b $init_subj -d afterok:$job3)
+job3redo=$(neurogliaArray $src/3_genQC $subjlist -d afterok:$job2redo -g)
+
+#volume-based diffusion tracking:
+job41=$(neurogliaArray $src/4.1_genParcellation  $subjlist -d afterok:$job4  )
+job42=$(neurogliaArray $src/4.2_warpParcellationsToMNI  $subjlist  -d aftercorr:$job41)
+job71=$(neurogliaArray $src/7.1_computeIndivParcMapLeftRight $subjlist  -d aftercorr:$job42)
+job83=$(neurogliaArray $src/8.3_computeMaxProbDiffParcVolumeLeftRight $subjlist -d afterok:$job71 -g)
+
+#surface-based morphometry & tracking:
+job90=$(neurogliaArray $src/9.0_runSurfDisplacementTemplate  $subjlist -d afterok:$job4 )
+job91=$(neurogliaArray $src/9.1_runSurfDisplacementTargets $subjlist  -d afterok:$job90 )
+job92=$(neurogliaArray $src/9.2_runSurfBasedTractography $subjlist  -d afterok:$job90 )
+
+
+popd
