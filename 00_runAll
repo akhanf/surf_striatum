@@ -15,7 +15,7 @@ job1=$(neurogliaArray $src/1_importData $subjlist -b $in )
 
 #preproc & QC gen
 job2=$(neurogliaArray $src/2.0_processT1 $subjlist -d aftercorr:$job1)
-job4=$(neurogliaArray $src/4.0_preprocDTI $subjlist -d aftercorr:$job1)
+job4=$(neurogliaArray $src/4.0_preprocDTI $subjlist -d aftercorr:$job1 -j Long)
 job3=$(neurogliaArray $src/3_genQC $subjlist -d afterok:$job2 -g)
 
 # faillist is created after manual QC of affine reg, and init subject is 
@@ -34,9 +34,9 @@ job71=$(neurogliaArray $src/7.1_computeIndivParcMapLeftRight $subjlist  -d after
 job83=$(neurogliaArray $src/8.3_computeMaxProbDiffParcVolumeLeftRight $subjlist -d afterok:$job71 -g)
 
 #surface-based morphometry & tracking:
-job90=$(neurogliaArray $src/9.0_runSurfDisplacementTemplate  $subjlist -d afterok:$job4 )
+job90=$(neurogliaArray $src/9.0_runSurfDisplacementTemplate  $subjlist -d afterok:$job3redo )
 job91=$(neurogliaArray $src/9.1_runSurfDisplacementTargets $subjlist  -d afterok:$job90 )
-job92=$(neurogliaArray $src/9.2_runSurfBasedTractography $subjlist  -d afterok:$job90 )
+job92=$(neurogliaArray $src/9.2_runSurfBasedTractography $subjlist  -d afterok:$job91:$job4 )
 
 
 popd
