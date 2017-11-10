@@ -7,16 +7,27 @@ out=/home/akhanf/surf_striatum/work_pipeline
 
 subjlist=$src/subjects_newJune2017
 
+
+#use opts to set options for ALL jobs below
+opts=""
+
+#uncomment below for subjlist
+opts="$opts -s LCT15_1OFF"
+
+#uncomment below for test mode (no submit jobs)
+#opts="$opts -t"
+
+
 mkdir -p $out
 pushd $out
 
-#import
-job1=$(neurogliaArray $src/1_importData $subjlist -b $in )
+#import 
+job1=$(neurogliaArray $src/1_importData $subjlist $opts -b $in -j Short)
 
 #preproc & QC gen
-job2=$(neurogliaArray $src/2.0_processT1 $subjlist -d aftercorr:$job1)
-job4=$(neurogliaArray $src/4.0_preprocDTI $subjlist -d aftercorr:$job1 -j Long)
-job3=$(neurogliaArray $src/3_genQC $subjlist -d afterok:$job2 -g)
+job2=$(neurogliaArray $src/2.0_processT1 $subjlist $opts -d aftercorr:$job1 -j Short)
+job4=$(neurogliaArray $src/4.0_preprocDTI $subjlist $opts -d aftercorr:$job1 -j Fat)
+job3=$(neurogliaArray $src/3_genQC $subjlist $opts -d afterok:$job2 -g -j Short)
 
 # faillist is created after manual QC of affine reg, and init subject is 
 # chosen to be one of the subj that did not fail
@@ -24,19 +35,19 @@ faillist=$src/subjects_newJune2017.failReg
 init_subj=LPD16_1OFF
 
 #preproc & QC gen 
-job2redo=$(neurogliaArray $src/2.1_processT1_regFail $faillist -b $init_subj -d afterok:$job3)
-job3redo=$(neurogliaArray $src/3_genQC $subjlist -d afterok:$job2redo -g)
+job2redo=$(neurogliaArray $src/2.1_processT1_regFail $faillist $opts -b $init_subj -d afterok:$job3 -j Short)
+job3redo=$(neurogliaArray $src/3_genQC $subjlist $opts -d afterok:$job2redo -g -j Short)
 
 #volume-based diffusion tracking:
-job41=$(neurogliaArray $src/4.1_genParcellation  $subjlist -d afterok:$job4  )
-job42=$(neurogliaArray $src/4.2_warpParcellationsToMNI  $subjlist  -d aftercorr:$job41)
-job71=$(neurogliaArray $src/7.1_computeIndivParcMapLeftRight $subjlist  -d aftercorr:$job42)
-job83=$(neurogliaArray $src/8.3_computeMaxProbDiffParcVolumeLeftRight $subjlist -d afterok:$job71 -g)
+job41=$(neurogliaArray $src/4.1_genParcellation  $subjlist $opts -d afterok:$job4  )
+job42=$(neurogliaArray $src/4.2_warpParcellationsToMNI  $subjlist $opts  -d aftercorr:$job41 -j Short)
+job71=$(neurogliaArray $src/7.1_computeIndivParcMapLeftRight $subjlist $opts  -d aftercorr:$job42 -j Short)
+job83=$(neurogliaArray $src/8.3_computeMaxProbDiffParcVolumeLeftRight $subjlist $opts -d afterok:$job71 -g )
 
 #surface-based morphometry & tracking:
-job90=$(neurogliaArray $src/9.0_runSurfDisplacementTemplate  $subjlist -d afterok:$job3redo )
-job91=$(neurogliaArray $src/9.1_runSurfDisplacementTargets $subjlist  -d afterok:$job90 )
-job92=$(neurogliaArray $src/9.2_runSurfBasedTractography $subjlist  -d afterok:$job91:$job4 )
+job90=$(neurogliaArray $src/9.0_runSurfDisplacementTemplate  $subjlist $opts -d afterok:$job3redo -g -j Short)
+job91=$(neurogliaArray $src/9.1_runSurfDisplacementTargets $subjlist $opts  -d afterok:$job90 )
+job92=$(neurogliaArray $src/9.2_runSurfBasedTractography $subjlist $opts  -d afterok:$job91:$job4 )
 
 
 popd

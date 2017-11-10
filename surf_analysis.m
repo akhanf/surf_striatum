@@ -4,7 +4,7 @@
 %% definitions
 
 
-data_dir='work';
+data_dir='work_pipeline';
 
 surfdisp_dir=sprintf('%s/surfdisp_singlestruct_striatum_unbiasedAvg_affine',data_dir);
 
@@ -41,12 +41,6 @@ contrasts={[1,2],[2,1]};
 % contrasts={[1,2],[2,1]};
 % 
 
-
-%% ALT - 1 scan per patient
-% 
-% subjects=importdata('subjects_1scan');
-% controls=[1:5,19:24];
-% patients=[6:18,25:31];
 
 %% get template surface (in MNI space)
 
