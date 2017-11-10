@@ -72,7 +72,7 @@ for s=1:length(subjects)
     conn=importdata(conn_matrix_txt);
    
     if(size(conn,2))==8
-        conn=conn(:,2:end);%strip off 1st col (all_segs target)
+        conn=conn(:,1:(end-1));%strip off last col (all_segs target)
     end
     
     [maxval,maxlabel]=max(conn,[],2);
@@ -209,7 +209,7 @@ for s=1:length(subjects)
     
     conn=importdata(conn_matrix_txt);
     if(size(conn,2))==8
-        conn=conn(:,2:end);%strip off 1st col (all_segs target)
+        conn=conn(:,1:(end-1));%strip off last col (all_segs target)
     end
     
     [maxval,maxlabel]=max(conn,[],2);
@@ -247,7 +247,7 @@ for s=1:length(subjects)
     conn_matrix_txt=sprintf('%s/%s/dwi/uncorrected_denoise_unring_eddy/vertexTract/matrix_seeds_to_all_targets',data_dir,subj);
     conn=importdata(conn_matrix_txt);
     if(size(conn,2))==8
-        conn=conn(:,2:end);%strip off 1st col (all_segs target)
+        conn=conn(:,1:(end-1));%strip off 1st col (all_segs target)
     end
     %get T1-based surf displacement data
     surfdisp_txt=sprintf('%s/%s/dstriatum.surf_inout.txt',surfdisp_dir,subj);
@@ -269,13 +269,13 @@ for s=1:length(subjects)
             nverts(h,i)=sum(selection);
             surfarea(s,h,i)=computeSurfArea(v_mni,e_mni,selection);
             
-        %    disp(sprintf('%s %s, nverts=%d, area=%f',hemi{h},targets{i},nverts(h,i),surfarea(s,h,i)));
-            
-            %  subplot(length(hemi),length(targets),subploti);
-            %  hist(inout(selection)); subploti=subploti+1;
-            % xlim([-3,3]); ylim([0,1500]);
-            % titletext=sprintf('%s %s',hemi_s{h},targets_s{i});
-            % title(titletext);
+%             disp(sprintf('%s %s, nverts=%d, area=%f',hemi{h},targets{i},nverts(h,i),surfarea(s,h,i)));
+%             
+%              subplot(length(hemi),length(targets),subploti);
+%              hist(inout(selection)); subploti=subploti+1;
+%             xlim([-3,3]); ylim([0,1500]);
+%             titletext=sprintf('%s %s',hemi_s{h},targets_s{i});
+%             title(titletext);
             
             meansurfdisp_subjparc(s,h,i)=mean(inout(selection));
         end
@@ -339,6 +339,7 @@ for s=1:length(subjects)
     subj=subjects{s};
     fdt_matrix=sprintf('%s/%s/dwi/uncorrected_denoise_unring_eddy/vertexTract/fdt_matrix2.dot',data_dir,subj);
     
+    %following commandis memory intensive:
     mat=spconvert(load(fdt_matrix));
     
     maskimg=sprintf('%s/%s/dwi/uncorrected_denoise_unring_eddy/bedpost.bedpostX/nodif_brain_mask_bin.nii.gz',data_dir,subj);
@@ -364,25 +365,8 @@ for s=1:length(subjects)
         end
     end
     
-    
-end
+    % generate probabilistic maps of tracts emanating from each parcellation:
 
-
-
-
-%% generate probabilistic maps of tracts emanating from each parcellation:
-
-
-
-for s=1:length(subjects)
-    subj=subjects{s};
-    fdt_matrix=sprintf('%s/%s/dwi/uncorrected_denoise_unring_eddy/vertexTract/fdt_matrix2.dot',data_dir,subj);
-    
-    mat=spconvert(load(fdt_matrix));
-    
-    maskimg=sprintf('%s/%s/dwi/uncorrected_denoise_unring_eddy/bedpost.bedpostX/nodif_brain_mask_bin.nii.gz',data_dir,subj);
-    mask=load_nifti(maskimg);
-    
     probtracts_nii=mask;
     
    probtracts_dir=sprintf('%s/%s/dwi/uncorrected_denoise_unring_eddy/vertexTract/probmaps_avgparc',data_dir,subj);
@@ -403,16 +387,16 @@ for s=1:length(subjects)
     end
     
     
+    
 end
-
 
 
  
 
 
 %% Write data to tables:
-
-%% generate variable for output order of csv files
+target_order=[3,2,6,1,5,4,7];
+% generate variable for output order of csv files
 r=1;
 var_names={};
 for t=1:length(targets)
@@ -425,7 +409,7 @@ end
 
 %% write surf disp data to table
 out_data=zeros(length(subjects),length(targets)*2);
-target_order=[3,2,6,1,5,4,7];
+
 
 for s=1:length(subjects)
     structi=1
@@ -494,164 +478,168 @@ writetable(fa_table,'meanFA_avgsurfparc.txt','WriteRowNames',1,'WriteVariableNam
 save('tables.mat','fa_table','surfdisp_table','surfarea_table');
 
 
-%% plotting below:
+% %% plotting below:
+% 
+% 
+% %% plot avg surf area
+% 
+% mean_left=squeeze(mean(surfarea(:,1,:),1))
+% mean_right=squeeze(mean(surfarea(:,2,:),1))
+% 
+% std_left=squeeze(std(surfarea(:,1,:),0,1))
+% std_right=squeeze(std(surfarea(:,2,:),0,1))
+% 
+% figure; errorbar(mean_left,std_left);
+% figure; errorbar(mean_right,std_right);
+% 
+% %% plot avg mean surf disp
+% 
+% mean_left=squeeze(mean(meansurfdisp(:,1,:),1))
+% mean_right=squeeze(mean(meansurfdisp(:,2,:),1))
+% 
+% std_left=squeeze(std(meansurfdisp(:,1,:),0,1))
+% std_right=squeeze(std(meansurfdisp(:,2,:),0,1))
+% 
+% figure; errorbar(mean_left,std_left); ylim([-2,2]);
+% figure; errorbar(mean_right,std_right); ylim([-2,2]);
+% 
+% 
+% 
+% 
+% %% plot mean surf disp avgparc ctrl pd
+% 
+% for h=1:2
+%    
+% mean_ctrl=squeeze(mean(meansurfdisp(controls,h,:),1))
+% std_ctrl=squeeze(std(meansurfdisp(controls,h,:),0,1))
+%     
+% mean_pd=squeeze(mean(meansurfdisp(patients,h,:),1))
+% std_pd=squeeze(std(meansurfdisp(patients,h,:),0,1))
+% 
+% 
+% figure; errorbar(mean_ctrl,std_ctrl); %ylim([-2,2]);
+% hold on; errorbar(mean_pd,std_pd); %ylim([-2,2]);
+% set(gca,'XTick',[1:7],'XTickLabels',targets_s);
+% title(sprintf('PD vs CTRL, %s striatum',hemi{h}));
+% 
+% legend({'CTRL','PD'});
+% end
+% 
+% 
+% 
+% %% plot surf area ctrl pd
+% 
+% for h=1:2
+%    
+% mean_ctrl=squeeze(mean(surfarea(controls,h,:),1))
+% std_ctrl=squeeze(std(surfarea(controls,h,:),0,1))
+%     
+% mean_pd=squeeze(mean(surfarea(patients,h,:),1))
+% std_pd=squeeze(std(surfarea(patients,h,:),0,1))
+% 
+% 
+% figure; errorbar(mean_ctrl,std_ctrl); %ylim([-2,2]);
+% hold on; errorbar(mean_pd,std_pd); %ylim([-2,2]);
+% set(gca,'XTick',[1:7],'XTickLabels',targets_s);
+% title(sprintf('PD vs CTRL, %s striatum',hemi{h}));
+% 
+% legend({'CTRL','PD'});
+% end
+% 
+% 
+% %% plot parc vol ctrl pd
+% 
+% for h=1:2
+%    
+% mean_ctrl=squeeze(mean(voldata(controls,h,:),1))
+% std_ctrl=squeeze(std(voldata(controls,h,:),0,1))
+%     
+% mean_pd=squeeze(mean(voldata(patients,h,:),1))
+% std_pd=squeeze(std(voldata(patients,h,:),0,1))
+% 
+% 
+% figure; errorbar(mean_ctrl,std_ctrl); %ylim([-2,2]);
+% hold on; errorbar(mean_pd,std_pd); %ylim([-2,2]);
+% set(gca,'XTick',[1:7],'XTickLabels',targets_s);
+% title(sprintf('PD vs CTRL, %s striatum',hemi{h}));
+% 
+% legend({'CTRL','PD'});
+% end
+% 
+% 
+% %% plot mean surf disp subj-specfici parc ctrl pd
+% 
+% for h=1:2
+%    
+% mean_ctrl=squeeze(mean(meansurfdisp_subjparc(controls,h,:),1))
+% std_ctrl=squeeze(std(meansurfdisp_subjparc(controls,h,:),0,1))
+%     
+% mean_pd=squeeze(mean(meansurfdisp_subjparc(patients,h,:),1))
+% std_pd=squeeze(std(meansurfdisp_subjparc(patients,h,:),0,1))
+% 
+% 
+% figure; errorbar(mean_ctrl,std_ctrl); %ylim([-2,2]);
+% hold on; errorbar(mean_pd,std_pd); %ylim([-2,2]);
+% set(gca,'XTick',[1:7],'XTickLabels',targets_s);
+% title(sprintf('PD vs CTRL, %s striatum',hemi{h}));
+% 
+% legend({'CTRL','PD'});
+% end
+% 
+% 
+% 
+% %% plot mean fa avgparc ctrl pd
+% 
+% for h=1:2
+%    
+% mean_ctrl=squeeze(mean(mean_fa(controls,h,:),1))
+% std_ctrl=squeeze(std(mean_fa(controls,h,:),0,1))
+%     
+% mean_pd=squeeze(mean(mean_fa(patients,h,:),1))
+% std_pd=squeeze(std(mean_fa(patients,h,:),0,1))
+% 
+% 
+% figure; errorbar(mean_ctrl,std_ctrl); ylim([0.2,0.6]);
+% hold on; errorbar(mean_pd,std_pd); ylim([0.2,0.6]);
+% set(gca,'XTick',[1:7],'XTickLabels',targets_s);
+% title(sprintf('PD vs CTRL, %s striatum',hemi{h}));
+% 
+% legend({'CTRL','PD'});
+% end
+% 
+% 
+% %% plot mean surf disp ctrl
+% 
+% 
+% mean_ctrl_left=squeeze(mean(meansurfdisp(controls,1,:),1))
+% mean_ctrl_right=squeeze(mean(meansurfdisp(controls,2,:),1))
+% 
+% std_ctrl_left=squeeze(std(meansurfdisp(controls,1,:),0,1))
+% std_ctrl_right=squeeze(std(meansurfdisp(controls,2,:),0,1))
+% 
+% 
+% % patients
+% 
+% 
+% mean_pd_left=squeeze(mean(meansurfdisp(patients,1,:),1))
+% mean_pd_right=squeeze(mean(meansurfdisp(patients,2,:),1))
+% 
+% std_pd_left=squeeze(std(meansurfdisp(patients,1,:),0,1))
+% std_pd_right=squeeze(std(meansurfdisp(patients,2,:),0,1))
+% 
+% figure; errorbar(mean_ctrl_left,std_ctrl_left); ylim([-2,2]);
+% hold on; errorbar(mean_pd_left,std_pd_left); ylim([-2,2]);
+% set(gca,'XTick',[1:7],'XTickLabels',targets_s);
+% title('PD vs CTRL, left striatum');
+% 
+% figure; errorbar(mean_ctrl_right,std_ctrl_right); ylim([-2,2]);
+% hold on; errorbar(mean_pd_right,std_pd_right); ylim([-2,2]);
+% set(gca,'XTick',[1:7],'XTickLabels',targets_s);
+% title('PD vs CTRL, right striatum');
+% 
 
 
-%% plot avg surf area
 
-mean_left=squeeze(mean(surfarea(:,1,:),1))
-mean_right=squeeze(mean(surfarea(:,2,:),1))
-
-std_left=squeeze(std(surfarea(:,1,:),0,1))
-std_right=squeeze(std(surfarea(:,2,:),0,1))
-
-figure; errorbar(mean_left,std_left);
-figure; errorbar(mean_right,std_right);
-
-%% plot avg mean surf disp
-
-mean_left=squeeze(mean(meansurfdisp(:,1,:),1))
-mean_right=squeeze(mean(meansurfdisp(:,2,:),1))
-
-std_left=squeeze(std(meansurfdisp(:,1,:),0,1))
-std_right=squeeze(std(meansurfdisp(:,2,:),0,1))
-
-figure; errorbar(mean_left,std_left); ylim([-2,2]);
-figure; errorbar(mean_right,std_right); ylim([-2,2]);
-
-
-
-
-%% plot mean surf disp avgparc ctrl pd
-
-for h=1:2
-   
-mean_ctrl=squeeze(mean(meansurfdisp(controls,h,:),1))
-std_ctrl=squeeze(std(meansurfdisp(controls,h,:),0,1))
-    
-mean_pd=squeeze(mean(meansurfdisp(patients,h,:),1))
-std_pd=squeeze(std(meansurfdisp(patients,h,:),0,1))
-
-
-figure; errorbar(mean_ctrl,std_ctrl); %ylim([-2,2]);
-hold on; errorbar(mean_pd,std_pd); %ylim([-2,2]);
-set(gca,'XTick',[1:7],'XTickLabels',targets_s);
-title(sprintf('PD vs CTRL, %s striatum',hemi{h}));
-
-legend({'CTRL','PD'});
-end
-
-
-
-%% plot surf area ctrl pd
-
-for h=1:2
-   
-mean_ctrl=squeeze(mean(surfarea(controls,h,:),1))
-std_ctrl=squeeze(std(surfarea(controls,h,:),0,1))
-    
-mean_pd=squeeze(mean(surfarea(patients,h,:),1))
-std_pd=squeeze(std(surfarea(patients,h,:),0,1))
-
-
-figure; errorbar(mean_ctrl,std_ctrl); %ylim([-2,2]);
-hold on; errorbar(mean_pd,std_pd); %ylim([-2,2]);
-set(gca,'XTick',[1:7],'XTickLabels',targets_s);
-title(sprintf('PD vs CTRL, %s striatum',hemi{h}));
-
-legend({'CTRL','PD'});
-end
-
-
-%% plot parc vol ctrl pd
-
-for h=1:2
-   
-mean_ctrl=squeeze(mean(voldata(controls,h,:),1))
-std_ctrl=squeeze(std(voldata(controls,h,:),0,1))
-    
-mean_pd=squeeze(mean(voldata(patients,h,:),1))
-std_pd=squeeze(std(voldata(patients,h,:),0,1))
-
-
-figure; errorbar(mean_ctrl,std_ctrl); %ylim([-2,2]);
-hold on; errorbar(mean_pd,std_pd); %ylim([-2,2]);
-set(gca,'XTick',[1:7],'XTickLabels',targets_s);
-title(sprintf('PD vs CTRL, %s striatum',hemi{h}));
-
-legend({'CTRL','PD'});
-end
-
-
-%% plot mean surf disp subj-specfici parc ctrl pd
-
-for h=1:2
-   
-mean_ctrl=squeeze(mean(meansurfdisp_subjparc(controls,h,:),1))
-std_ctrl=squeeze(std(meansurfdisp_subjparc(controls,h,:),0,1))
-    
-mean_pd=squeeze(mean(meansurfdisp_subjparc(patients,h,:),1))
-std_pd=squeeze(std(meansurfdisp_subjparc(patients,h,:),0,1))
-
-
-figure; errorbar(mean_ctrl,std_ctrl); %ylim([-2,2]);
-hold on; errorbar(mean_pd,std_pd); %ylim([-2,2]);
-set(gca,'XTick',[1:7],'XTickLabels',targets_s);
-title(sprintf('PD vs CTRL, %s striatum',hemi{h}));
-
-legend({'CTRL','PD'});
-end
-
-
-
-%% plot mean fa avgparc ctrl pd
-
-for h=1:2
-   
-mean_ctrl=squeeze(mean(mean_fa(controls,h,:),1))
-std_ctrl=squeeze(std(mean_fa(controls,h,:),0,1))
-    
-mean_pd=squeeze(mean(mean_fa(patients,h,:),1))
-std_pd=squeeze(std(mean_fa(patients,h,:),0,1))
-
-
-figure; errorbar(mean_ctrl,std_ctrl); ylim([0.2,0.6]);
-hold on; errorbar(mean_pd,std_pd); ylim([0.2,0.6]);
-set(gca,'XTick',[1:7],'XTickLabels',targets_s);
-title(sprintf('PD vs CTRL, %s striatum',hemi{h}));
-
-legend({'CTRL','PD'});
-end
-
-
-%% plot mean surf disp ctrl
-
-
-mean_ctrl_left=squeeze(mean(meansurfdisp(controls,1,:),1))
-mean_ctrl_right=squeeze(mean(meansurfdisp(controls,2,:),1))
-
-std_ctrl_left=squeeze(std(meansurfdisp(controls,1,:),0,1))
-std_ctrl_right=squeeze(std(meansurfdisp(controls,2,:),0,1))
-
-
-% patients
-
-
-mean_pd_left=squeeze(mean(meansurfdisp(patients,1,:),1))
-mean_pd_right=squeeze(mean(meansurfdisp(patients,2,:),1))
-
-std_pd_left=squeeze(std(meansurfdisp(patients,1,:),0,1))
-std_pd_right=squeeze(std(meansurfdisp(patients,2,:),0,1))
-
-figure; errorbar(mean_ctrl_left,std_ctrl_left); ylim([-2,2]);
-hold on; errorbar(mean_pd_left,std_pd_left); ylim([-2,2]);
-set(gca,'XTick',[1:7],'XTickLabels',targets_s);
-title('PD vs CTRL, left striatum');
-
-figure; errorbar(mean_ctrl_right,std_ctrl_right); ylim([-2,2]);
-hold on; errorbar(mean_pd_right,std_pd_right); ylim([-2,2]);
-set(gca,'XTick',[1:7],'XTickLabels',targets_s);
-title('PD vs CTRL, right striatum');
 
 
 %% Stats tests below:
@@ -685,17 +673,17 @@ end
 
 
 %% stats tests parc vol
-
-for h=1:2
-    for t=1:length(targets)
-        
-        [hyp, p]=ttest2(squeeze(voldata(controls,h,t)),squeeze(voldata(patients,h,t)));
-        if(hyp==1)
-            disp(sprintf('Volume: ctrl vs pd, %s %s, p-value=%f',hemi{h},targets{t},p));
-        end
-    end
-    
-end
+% 
+% for h=1:2
+%     for t=1:length(targets)
+%         
+%         [hyp, p]=ttest2(squeeze(voldata(controls,h,t)),squeeze(voldata(patients,h,t)));
+%         if(hyp==1)
+%             disp(sprintf('Volume: ctrl vs pd, %s %s, p-value=%f',hemi{h},targets{t},p));
+%         end
+%     end
+%     
+% end
 
 %% stats tests mean FA
 
@@ -711,75 +699,75 @@ for h=1:2
     
 end
 
-%% Other stuff below:
-
-
-%% compare vol with surf data
-
-parcvol=importdata('striatum_withRostralMotor.maxProbDiffusionParcVolume.byHemi.csv');
-
-
-target_order=[3,2,6,1,5,4,7];
-
-voldata=zeros(length(subjects),length(hemi),length(targets));
-
-
-for s=1:length(subjects)
-    structi=1;
-    for t=1:length(targets)
-        for h=1:2
-            
-            voldata(s,h,target_order(t))=parcvol.data(s,structi);
-            structi=structi+1;
-        end
-    end
-    
-end
-%% correlations between metrics..
-meanarea=squeeze(mean(surfarea(:,1,:),1));
-meanvol=squeeze(mean(voldata(:,1,:),1));
-for s=1:length(subjects)
-    area=surfarea(s,1,:);
-    vol=voldata(s,1,:);
-    disp(sprintf('corr subj area with vol: %s %02f',subjects{s},corr(area(:),vol(:))));
-    %disp(sprintf('corr subj area with mean vol: %s %02f',subjects{s},corr(area(:),meanvol(:))));
-    %disp(sprintf('corr subj vol with mean area: %s %02f',subjects{s},corr(vol(:),meanarea(:))));
-    %disp(sprintf('corr subj area with mean area: %s %02f',subjects{s},corr(area(:),meanarea(:))));
-end
-
-
-%% motor-exec area ratio
-%experimental..
-
-%left hemi
-hemi=1;
-motor_exec_ratio=surfarea(:,hemi,6)./surfarea(:,hemi,2);
-
-figure;
-for g=1:length(groups)
-    subplot(1,2,g);
-    boxplot(motor_exec_ratio(groups{g}));
-    title(group_name{g});
-end
-
-figure;
-for g=1:length(groups)
-    histogram(motor_exec_ratio(groups{g}),12);
-    hold on;
-    
-end
-legend(group_name);
-
-[motor_exec_ratio_sorted,sortind]=sort(motor_exec_ratio);
-subj_sorted_motor_exec_ratio=subjects(sortind);
-
-
-%% compare surf and volume parcellation
-
-figure; scatter(surfarea(:),voldata(:)); xlabel('surface parcellation'); ylabel('volume parcellation');
-
-corr(surfarea(:),voldata(:))
-
-
-%% save all 
-save(sprintf('stats_workspace_%s.mat',date));
+%% Other stuff below: all commented for now
+% 
+% 
+% %% compare vol with surf data
+% 
+% parcvol=importdata('striatum_withRostralMotor.maxProbDiffusionParcVolume.byHemi.csv');
+% 
+% 
+% target_order=[3,2,6,1,5,4,7];
+% 
+% voldata=zeros(length(subjects),length(hemi),length(targets));
+% 
+% 
+% for s=1:length(subjects)
+%     structi=1;
+%     for t=1:length(targets)
+%         for h=1:2
+%             
+%             voldata(s,h,target_order(t))=parcvol.data(s,structi);
+%             structi=structi+1;
+%         end
+%     end
+%     
+% end
+% %% correlations between metrics..
+% meanarea=squeeze(mean(surfarea(:,1,:),1));
+% meanvol=squeeze(mean(voldata(:,1,:),1));
+% for s=1:length(subjects)
+%     area=surfarea(s,1,:);
+%     vol=voldata(s,1,:);
+%     disp(sprintf('corr subj area with vol: %s %02f',subjects{s},corr(area(:),vol(:))));
+%     %disp(sprintf('corr subj area with mean vol: %s %02f',subjects{s},corr(area(:),meanvol(:))));
+%     %disp(sprintf('corr subj vol with mean area: %s %02f',subjects{s},corr(vol(:),meanarea(:))));
+%     %disp(sprintf('corr subj area with mean area: %s %02f',subjects{s},corr(area(:),meanarea(:))));
+% end
+% 
+% 
+% %% motor-exec area ratio
+% %experimental..
+% 
+% %left hemi
+% hemi=1;
+% motor_exec_ratio=surfarea(:,hemi,6)./surfarea(:,hemi,2);
+% 
+% figure;
+% for g=1:length(groups)
+%     subplot(1,2,g);
+%     boxplot(motor_exec_ratio(groups{g}));
+%     title(group_name{g});
+% end
+% 
+% figure;
+% for g=1:length(groups)
+%     histogram(motor_exec_ratio(groups{g}),12);
+%     hold on;
+%     
+% end
+% legend(group_name);
+% 
+% [motor_exec_ratio_sorted,sortind]=sort(motor_exec_ratio);
+% subj_sorted_motor_exec_ratio=subjects(sortind);
+% 
+% 
+% %% compare surf and volume parcellation
+% 
+% figure; scatter(surfarea(:),voldata(:)); xlabel('surface parcellation'); ylabel('volume parcellation');
+% 
+% corr(surfarea(:),voldata(:))
+% 
+% 
+% %% save all 
+% save(sprintf('stats_workspace_%s.mat',date));
