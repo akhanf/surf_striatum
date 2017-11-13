@@ -1,10 +1,12 @@
 %script for analyzing surface-based data -- clean-up in progress
 
+function analyzeSurfData ( subj_list )
+
 
 %% definitions
-
-
 data_dir='work_pipeline';
+
+
 
 surfdisp_dir=sprintf('%s/surfdisp_singlestruct_striatum_unbiasedAvg_affine',data_dir);
 
@@ -18,12 +20,27 @@ targets_s={'cd_m','ex','li','oc','pa','ro_m','te'};
 
 %% load in subject/group info
 
-subjects=importdata('subjects_newJune2017');
+subjects=importdata(subj_list);
 
 %need to make sure te following is updated based on new subject list
-group_name={'ctrl','pd'};
-controls=[7:14];
-patients=[1:6];
+group_name={'CTRL','PD'};
+
+controls=[];
+patients=[];
+
+%look for PD substring in subj name to define patients
+ind=strfind(subjects,group_name{2});
+for i=1:length(ind)
+	if(~isempty(ind{i}))
+		patients=[patients,i];
+	else
+		controls=[controls,i];
+	end
+end
+
+%controls=[7:14];
+%patients=[1:6];
+
 groups{1}=controls;
 groups{2}=patients;
 
@@ -771,3 +788,6 @@ end
 % 
 % %% save all 
 % save(sprintf('stats_workspace_%s.mat',date));
+
+
+end
