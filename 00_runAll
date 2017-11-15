@@ -15,7 +15,7 @@ opts=""
 #opts="$opts -s LCT15_1OFF"
 
 #uncomment below for test mode (no submit jobs)
-#opts="$opts -t"
+opts="$opts -t"
 
 
 mkdir -p $out
@@ -48,6 +48,10 @@ job83=$(neurogliaBatch $src/8.3_computeMaxProbDiffParcVolumeLeftRight $subjlist 
 job90=$(neurogliaBatch $src/9.0_runSurfDisplacementTemplate  $subjlist $opts -d afterok:$job3redo -g -j Short)
 job91=$(neurogliaBatch $src/9.1_runSurfDisplacementTargets $subjlist $opts  -d afterok:$job90 )
 job92=$(neurogliaBatch $src/9.2_runSurfBasedTractography $subjlist $opts  -d afterok:$job91:$job4 )
+
+#run matlab job to summarize surface-based displacement & tract data, and generate vtk files (visualize in paraview)
+job93=$(neurogliaBatch $src/9.3_analyzeSurfData $subjlist $opts -d afterok:$job92 -g )
+
 
 
 popd

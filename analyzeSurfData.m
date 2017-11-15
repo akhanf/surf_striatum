@@ -49,7 +49,7 @@ contrasts={[1,2],[2,1]};
 % 
 % subjects=importdata('../subjects_newJune2017_completed');
 % 
-% group_name={'ctrl','pd'};
+% group_name={'CTRL','pd'};
 % controls=[7:13];
 % patients=[1:6];
 % groups{1}=controls;
@@ -126,7 +126,7 @@ end
 
 [maxval, majVote_maxlabels]=max(freq_maxlabels,[],2);
 
-if (strcmp(group_name{g},'ctrl'))
+if (strcmp(group_name{g},'CTRL'))
     majVote_maxlabels_ctrl=majVote_maxlabels;
 end
     
@@ -152,7 +152,7 @@ end
 conf_th=0.5
 writeByuWithScalarToVTK(template_byu,confidence>conf_th,sprintf('%s/majVote_confidenceMask_threshold%f_%s.vtk',avgparc_dir,conf_th,group_name{g}));
 
-if (strcmp(group_name{g},'ctrl'))
+if (strcmp(group_name{g},'CTRL'))
     conf_mask=confidence>conf_th;
 
 
