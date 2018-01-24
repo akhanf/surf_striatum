@@ -19,3 +19,6 @@ propLabels_backwards_intersubj_aladin t1  striatum_bspline_f3d_MNI152_1mm MNI152
 computeSurfaceDisplacementsSingleStructure $subj $PIPELINE_CFG_DIR/surf_disp/penny_striatum/striatum_affine.cfg -N
 
 done
+
+
+exit 0

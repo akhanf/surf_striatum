@@ -9,4 +9,6 @@ do
  processEddyNoTopUp uncorrected_denoise_unring $subj
  processBedpost uncorrected_denoise_unring_eddy $subj
 
+ 
 done
+exit 0

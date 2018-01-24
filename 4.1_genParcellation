@@ -7,3 +7,4 @@ do
  processBedpostParcellateSeed uncorrected_denoise_unring_eddy striatum.cfg $subj
 
 done
+exit 0
