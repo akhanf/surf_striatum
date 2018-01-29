@@ -1,0 +1,7 @@
+import_t1,t1/t1.nii.gz
+import_dwi,dwi/uncorrected/dwi.nii.gz
+2.0,labels/dwi/striatum_bspline_f3d_rigid_aladin_MNI152_1mm/striatum-structural-1mm.nii.gz
+4.0,dwi/uncorrected_denoise_unring_eddy/bedpost.bedpostX/dyads1.nii.gz
+4.1,dwi/uncorrected_denoise_unring_eddy/bedpost.striatum_withRostralMotor/probtrack/seeds_to_Caudal_motor.normVol.nii.gz
+4.2,dwi/uncorrected_denoise_unring_eddy/bedpost.striatum_withRostralMotor/probtrack/MNI152_1mm/seeds_to_Caudal_motor.normVol.nii.gz
+7.1,dwi/uncorrected_denoise_unring_eddy/bedpost.striatum_withRostralMotor/probtrack/MNI152_1mm/diffusion_parcellation.masked.nii.gz

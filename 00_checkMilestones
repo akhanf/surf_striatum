@@ -1,0 +1,45 @@
+#!/bin/bash
+
+
+rootpath=/project/6007967/nhiebert
+#use absolute paths here:
+src=$rootpath/surf_striatum/
+in=$rootpath/surf_striatum_rawdata/
+out=$rootpath/surf_striatum_ouput/
+
+
+subjlist=$src/subjlist
+csv=$src/milestones.csv
+status_dir=job_status_`date +%Y-%m-%d_%I%p`
+mkdir -p $status_dir
+
+N=`cat $csv | wc -l`
+
+for i in `seq 1 $N`
+do
+
+line=`head -n $i $csv | tail -n 1`
+job=${line%%,*}
+file_suf=${line#*,}
+
+echo $job $file_suf
+
+completed=$status_dir/${job}_completed
+failed=$status_dir/${job}_failed
+rm -f $completed $failed
+
+for subj in `cat $subjlist`
+do
+
+	if [ -e $out/$subj/$file_suf ]
+	then 
+		echo $subj >> $completed
+	else
+		echo $subj >> $failed
+	fi
+
+done
+
+done
+
+
