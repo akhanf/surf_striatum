@@ -1,0 +1,85 @@
+#!/bin/bash
+
+
+th=1000
+
+
+if [ "$#" -lt 1 ]
+then
+	 echo "Usage: $0 <subjlist>"
+	 exit 1
+fi
+
+subjlist=$1
+
+
+
+. $PIPELINE_CFG_DIR/parcellate/striatum.cfg
+
+
+
+out_csv=${parcellation_name}.subjDiffusionParcVolume.byHemi.csv
+
+echo -n subj > $out_csv
+for lbl_line in `cat $target_labels_txt`
+do
+
+  lbl=${lbl_line%%,*}
+for hemi in left right
+do
+  echo -n ,${hemi}_${lbl} >> $out_csv
+done
+
+done
+
+echo "" >> $out_csv
+
+
+
+
+
+for subj in `cat $subjlist`
+do
+
+echo computing volume for $subj
+ echo -n $subj  >> $out_csv
+ 
+ track_dir=$subj/dwi/uncorrected_denoise_unring_eddy/bedpost.${parcellation_name}/probtrack/MNI152_1mm
+ 
+ 
+ seedlist=""
+for lbl_line in `cat $target_labels_txt`
+do
+
+ 
+  lbl=${lbl_line%%,*}
+ 
+
+for hemi in left right
+do
+
+echo $lbl $hemi
+  hemi_map=$track_dir/seeds_to_$lbl.mask_$hemi.nii.gz
+  
+  if [ ! -e $hemi_map ]
+then
+  echo $hemi_map does not exist!
+  continue
+fi
+
+  echo "fslstats -t  $hemi_map  -l $th -v"
+  vol=`fslstats -t  $hemi_map  -l $th -v`
+  vol=${vol#[0-9]*\ }
+
+ echo -n ",$vol" >> $out_csv
+done
+done
+
+echo "" >> $out_csv
+
+
+
+
+
+
+done

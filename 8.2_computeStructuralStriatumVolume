@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ "$#" -lt 1 ]
+then
+ echo "Usage: $0 <subj list>"
+ exit 0
+fi
+
+out_csv=striatum_structural_volumes.csv
+
+computeSegVolume StriatumStructural.csv labels/dwi/striatum_bspline_f3d_rigid_aladin_MNI152_1mm/striatum-structural-1mm.hemi.nii.gz $1 > $out_csv 
