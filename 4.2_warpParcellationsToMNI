@@ -2,53 +2,35 @@
 
 function usage {
  echo ""
- echo "Usage: ${0##*/}  <subjid/list> <options>"
- echo "   -o output_dir  Set output directory (default .)"
+ echo "Usage: ${0##*/}  <working dir>  <subjids..> <options>"
  echo "" 
  
 }
 
-
-if [ "$#" -lt 1 ]
+if [ "$#" -lt 2 ]
 then
  usage
  exit 1
 fi
 
+execpath=`dirname $0`
+execpath=`realpath $execpath`
+. $execpath/000_global_settings.cfg
 
-output_dir=.
 
-if [ -f $1 ]
-then
- subjids=`cat $1`
-else
- subjids=$1
-fi
+work_dir=$1
+shift 1
 
-shift 1 
 
 interp_opt="-LIN"
 
-#flag o with argument "o:"
-while getopts "o:SL" options; do
- case $options in
-    o ) echo "Using output directory: $OPTARG"
-	output_dir=$OPTARG;;
-    * ) usage
-	exit 1;;
- esac
-done
+. $parcellate_cfg
 
 
-atlas=MNI152_1mm
-parcellate=striatum
+pushd $work_dir
 
-. $PIPELINE_CFG_DIR/parcellate/${parcellate}.cfg
-
-for subj in $subjids
+for subj in $@
 do
-
-
 
 
 
@@ -56,26 +38,32 @@ do
 #then average and create maxprob parcellation
 
 
- subj_dir=$output_dir/$subj
+ subj_dir=$subj
  
  reg_dir=$subj_dir/reg/bspline_f3d_t1/${atlas}_${subj}
 
 
 #apply xfm (using linear interp) 
 cpp=$reg_dir/ctrlpt_${subj}_to_${atlas}.nii.gz
+coreg_dir=$subj_dir/coreg/rigid_aladin_t1_$legacy_dwi_type
+execpath=`realpath $execpath`
 
-coreg_dir=$subj_dir/coreg/rigid_aladin_t1_dwi
+xfm_dwi_t1=$coreg_dir/${legacy_dwi_type}_to_t1.xfm
 
-xfm_dwi_t1=$coreg_dir/dwi_to_t1.xfm
+if [ "$legacy_dwi_proc" = 1 ]
+then
+track_dir=$subj_dir/$legacy_dwi_path/bedpost.${parcellation_name}/probtrack
+else
+track_dir=$subj_dir/bedpost.${parcellation_name}/probtrack
+fi
 
-
-track_dir=$subj_dir/dwi/uncorrected_denoise_unring_eddy/bedpost.${parcellation_name}/probtrack
 
 out_dir=$track_dir/$atlas
 mkdir -p $out_dir
 
 subj_t1=$subj_dir/t1/t1.brain.nii.gz
-atlas_t1=$PIPELINE_ATLAS_DIR/${atlas}/t1/t1.brain.nii.gz
+atlas_t1=${atlas}/t1/t1.brain.nii.gz
+
 
 for track in `ls $track_dir/seeds_to_*.nii.gz`
 do
@@ -84,17 +72,21 @@ target=${track##*seeds_to_}
 target=${target%%.nii.gz}
 
 track_atlas=$out_dir/seeds_to_${target}.nii.gz
+if [ "$legacy_dwi_proc" = 1 ]
+then
 reg_resample -flo $track -res $track_atlas -aff $xfm_dwi_t1 -ref $subj_t1 -LIN
 reg_resample -flo $track_atlas -res $track_atlas -cpp $cpp -ref $atlas_t1 -LIN
-
-
-done
-
-
-
-
+else
+reg_resample -flo $track -res $track_atlas -cpp $cpp -ref $atlas_t1 -LIN
+fi
 
 done
 
 
+
+
+
+done
+
+popd
 exit 0

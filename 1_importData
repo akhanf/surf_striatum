@@ -1,30 +1,43 @@
 #!/bin/bash
 
+function usage {
+ echo ""
+ echo "Usage: ${0##*/}  <in bids dataset> <working dir>"
+ echo "" 
+ 
+}
+
+if [ "$#" -lt 2 ]
+then
+ usage
+ exit 1
+fi
+
+
 #note: does not overwrite existing files!
 #dependencies: dcm2niix, fsl
 
-input_dir=$1
-shift 1
+in_bids=$1 
+work_dir=$2
+shift 2
 
+in_bids=`realpath $in_bids`
+pushd $work_dir
 
-for subj in $@
+for subj_dir in `ls -d $in_bids/sub-*`
 do
 
-dti_dir=$input_dir/$subj/dti
-t1_dir=$input_dir/$subj/t1
+subj=${subj_dir##*/}
+searchstring_t1w=*T1w.nii*
 
+N_t1w=`eval ls $in_bids/$subj/anat/${subj}${searchstring_t1w} | wc -l`
+in_t1w=`eval ls $in_bids/$subj/anat/${subj}${searchstring_t1w} | head -n 1`
 
+echo Found $N_t1w matching T1w, using first found: $in_t1w
 
- echo $subj, $dti_dir
-
- if [ ! -e $subj/dwi/uncorrected/dwi.nii.gz ]
- then
-   importDicomDTI_dcm2nii $dti_dir $subj
- fi
-
- if [ ! -e $subj/t1/t1.nii.gz ]
-then
-  importDicomT1 $t1_dir $subj
-fi
+echo importT1 $in_t1w $subj
+importT1 $in_t1w $subj
 
 done
+
+popd

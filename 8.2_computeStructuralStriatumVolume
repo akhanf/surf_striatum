@@ -1,11 +1,22 @@
 #!/bin/bash
 
-if [ "$#" -lt 1 ]
+if [ "$#" -lt 2 ]
 then
- echo "Usage: $0 <subj list>"
- exit 0
+	 echo "Usage: $0 <work_dir> <subjlist>"
+	 exit 1
 fi
+
+work_dir=$1
+subjlist=$2
+shift 2
+
+subjlist=`realpath $subjlist`
+
+pushd $work_dir
 
 out_csv=striatum_structural_volumes.csv
 
-computeSegVolume StriatumStructural.csv labels/dwi/striatum_bspline_f3d_rigid_aladin_MNI152_1mm/striatum-structural-1mm.hemi.nii.gz $1 > $out_csv 
+#FIX PATH BELOW
+computeSegVolume StriatumStructural.csv labels/t1/striatum_bspline_f3d_rigid_aladin_$atlas/striatum-structural-1mm.hemi.nii.gz $1 > $out_csv 
+
+popd

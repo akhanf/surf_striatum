@@ -1,40 +1,55 @@
 #!/bin/bash
 
 
+function usage {
+ echo ""
+ echo "Usage: ${0##*/}  <working dir>  <subjid/list> <options>"
+ echo "" 
+ 
+}
+
+if [ "$#" -lt 2 ]
+then
+ usage
+ exit 1
+fi
+
+#look for atlases in <scripts_dir>/atlases
+execpath=`dirname $0`
+execpath=`realpath $execpath`
+
+work_dir=$1
+shift 1
+
+
+
 #this script computes diffusion-based parcellation and corresponding volume 
 
 
 #requires c3d
 
+parcellate=striatum
 
-. $PIPELINE_CFG_DIR/parcellate/striatum.cfg
-
-
-#out_csv=${parcellation_name}.subjDiffusionParcVolume.csv
-
-#echo -n subj > $out_csv
-#for lbl_line in `cat $target_labels_txt`
-#do
-
-#  lbl=${lbl_line%%,*}
-
- # echo -n ,$lbl >> $out_csv
-#done
-
-#echo "" >> $out_csv
-
-#echo "subj,caudal_motor,executive,limbic,occipital,parietal,rostral_motor,temporal" > $out_csv
+. $execpath/${parcellate}.cfg
 
 
-atlas=MNI152_1mm
 
-hemi_nii=$PIPELINE_ATLAS_DIR/$atlas/labels/t1/striatum_penny/hemi.nii.gz
-mask=$PIPELINE_ATLAS_DIR/$atlas/labels/t1/striatum/striatum-structural-1mm.nii.gz
+pushd $work_dir
+
+# NEED TO FIX: should use paths defined in config file, or compute on the fly from existing atlas
+hemi_nii=$atlas/labels/t1/striatum_penny/hemi.nii.gz
+#mask=$atlas/labels/t1/striatum/striatum-structural-1mm.nii.gz
 
 for subj in $@
 do
  
- track_dir=$subj/dwi/uncorrected_denoise_unring_eddy/bedpost.${parcellation_name}/probtrack/$atlas
+if [ "$legacy_dwi_proc" = 1 ]
+then
+track_dir=$subj_dir/$legacy_dwi_path/bedpost.${parcellation_name}/probtrack
+else
+track_dir=$subj_dir/bedpost.${parcellation_name}/probtrack
+fi
+
  
  #use same template-based mask to define outer boundaries of striatum (to ensure these are identical for both diffusion and template-based maps)
 
@@ -84,18 +99,18 @@ echo fslmerge -t $track_dir/seeds.4d.nii.gz $seedlist
  fslmerge -t $track_dir/seeds.4d.nii.gz $seedlist
 echo  prob4DtoMaxProb $track_dir/seeds.4d.nii.gz 1 $dti_parc
  prob4DtoMaxProb $track_dir/seeds.4d.nii.gz 1 $dti_parc
-echo  fslmaths $mask -bin -mul $dti_parc $dti_parc
- fslmaths $mask -bin -mul $dti_parc $dti_parc
+
+#REMOVED FINAL MASKING
+#echo  fslmaths $mask -bin -mul $dti_parc $dti_parc
+# fslmaths $mask -bin -mul $dti_parc $dti_parc
 
 # fi
 
 
 
 
-
-
-
-
 done
+
+popd
 
 exit 0
