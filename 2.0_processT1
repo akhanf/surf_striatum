@@ -1,5 +1,12 @@
 #!/bin/bash
 
+
+#this script runs T1 preprocessing, registration from T1 to DWI, linear+nonlinear registration to MNI atlas, and propagating labels from MNI space to subject DWI space
+
+#future updates:
+# with prepdwi integration, dwi will be in T1 space already
+# with fmriprep --anat-only, T1 and MNI2009b registration will be complete, just need to warp seed/target labels from atlas to subject T1
+
 function usage {
  echo ""
  echo "Usage: ${0##*/}  <working dir> <subjids..>"

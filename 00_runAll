@@ -1,11 +1,17 @@
 #!/bin/bash
 
-#use absolute paths here:
-src=/home/akhanf/surf_striatum
-in=/project/6007967/akhanf/projects/penny_striatum/incoming_June2017
-out=/home/akhanf/surf_striatum/work_pipeline
+rootpath=/project/6007967/nhiebert
 
-subjlist=$src/subjects_newJune2017
+#use absolute paths here:
+src=$rootpath/surf_striatum/
+in=$rootpath/surf_striatum_rawdata/
+out=$rootpath/surf_striatum_ouput/
+
+subjlist=$src/subjlist
+
+
+SINGULARITY_IMG=`shub-cache shub://akhanf/vasst-dev:v0.0.4c`
+
 
 
 #use opts to set options for ALL jobs below
@@ -15,43 +21,41 @@ opts=""
 #opts="$opts -s LCT15_1OFF"
 
 #uncomment below for test mode (no submit jobs)
-opts="$opts -t"
+#opts="$opts -t"
 
 
-mkdir -p $out
-pushd $out
-
-#import 
-job1=$(neurogliaBatch $src/1_importData $subjlist $opts -b $in -j Short)
 
 #preproc & QC gen
-job2=$(neurogliaBatch $src/2.0_processT1 $subjlist $opts -d aftercorr:$job1 -j Short)
-job4=$(neurogliaBatch $src/4.0_preprocDTI $subjlist $opts -d aftercorr:$job1 -j Fat)
-job3=$(neurogliaBatch $src/3_genQC $subjlist $opts -d afterok:$job2 -g -j Short)
+#job2=$(neurogliaBatch ./2.0_processT1 $subjlist $opts -b $out  -j Short)
+job3=$(neurogliaBatch ./3_genQC $subjlist $opts -b $out  -g -j Short)
+
+
 
 # faillist is created after manual QC of affine reg, and init subject is 
 # chosen to be one of the subj that did not fail
-faillist=$src/subjects_newJune2017.failReg
-init_subj=LPD16_1OFF
+#faillist=./subjects_newJune2017.failReg
+#init_subj=LPD16_1OFF
 
 #preproc & QC gen 
-job2redo=$(neurogliaBatch $src/2.1_processT1_regFail $faillist $opts -b $init_subj -d afterok:$job3 -j Short)
-job3redo=$(neurogliaBatch $src/3_genQC $subjlist $opts -d afterok:$job2redo -g -j Short)
+#job2redo=$(neurogliaBatch ./2.1_processT1_regFail $faillist $opts -b $init_subj -d afterok:$job3 -j Short)
+#job3redo=$(neurogliaBatch ./3_genQC $subjlist $opts -d afterok:$job2redo -g -j Short)
 
 #volume-based diffusion tracking:
-job41=$(neurogliaBatch $src/4.1_genParcellation  $subjlist $opts -d afterok:$job4  )
-job42=$(neurogliaBatch $src/4.2_warpParcellationsToMNI  $subjlist $opts  -d aftercorr:$job41 -j Short)
-job71=$(neurogliaBatch $src/7.1_computeIndivParcMapLeftRight $subjlist $opts  -d aftercorr:$job42 -j Short)
-job83=$(neurogliaBatch $src/8.3_computeMaxProbDiffParcVolumeLeftRight $subjlist $opts -d afterok:$job71 -g )
+job41=$(neurogliaBatch ./4.1_genParcellation  $subjlist $opts -b $out  )
+job42=$(neurogliaBatch ./4.2_warpParcellationsToMNI  $subjlist $opts -b $out -d aftercorr:$job41 -j Short)
+job71=$(neurogliaBatch ./7.1_computeIndivParcMapLeftRight $subjlist $opts -b $out -d aftercorr:$job42 -j Short)
+#job83=$(neurogliaBatch ./8.3_computeMaxProbDiffParcVolumeLeftRight $subjlist $opts -d afterok:$job71 -g )
+
+exit 0
+
 
 #surface-based morphometry & tracking:
-job90=$(neurogliaBatch $src/9.0_runSurfDisplacementTemplate  $subjlist $opts -d afterok:$job3redo -g -j Short)
-job91=$(neurogliaBatch $src/9.1_runSurfDisplacementTargets $subjlist $opts  -d afterok:$job90 )
-job92=$(neurogliaBatch $src/9.2_runSurfBasedTractography $subjlist $opts  -d afterok:$job91:$job4 )
+job90=$(neurogliaBatch ./9.0_runSurfDisplacementTemplate  $subjlist $opts -d afterok:$job3redo -g -j Short)
+job91=$(neurogliaBatch ./9.1_runSurfDisplacementTargets $subjlist $opts  -d afterok:$job90 )
+job92=$(neurogliaBatch ./9.2_runSurfBasedTractography $subjlist $opts  -d afterok:$job91:$job4 )
 
 #run matlab job to summarize surface-based displacement & tract data, and generate vtk files (visualize in paraview)
-job93=$(neurogliaBatch $src/9.3_analyzeSurfData $subjlist $opts -d afterok:$job92 -g )
+job93=$(neurogliaBatch ./9.3_analyzeSurfData $subjlist $opts -d afterok:$job92 -g )
 
 
 
-popd
